@@ -1,0 +1,34 @@
+{
+  "name": "video-deband",
+  "version": "1.0.0",
+  "description": "Automatically deband a video using a WebGL shader to get rid of those pesky compression artifacts.",
+  "files": [
+    "dist/*",
+    "src/*",
+    "docs/"
+  ],
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "vite": "^3.0.2"
+  },
+  "license": "MIT",
+  "author": "ThaUnknown",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThaUnknown/video-deband.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ThaUnknown/video-deband/issues"
+  },
+  "homepage": "https://github.com/ThaUnknown/video-deband#readme",
+  "dependencies": {
+    "rvfc-polyfill": "^1.0.7",
+    "three": "^0.159.0"
+  }
+}
