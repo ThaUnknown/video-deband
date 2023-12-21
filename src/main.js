@@ -31,20 +31,14 @@ export default class VideoDeband {
     scene.add(planeMesh)
 
     this.renderer = new WebGLRenderer()
-    this.renderer.setSize(video.videoWidth, video.videoWidth)
+    this.renderer.setSize(video.videoWidth, video.videoHeight)
+    const resizeVideo = () => {
+      this.renderer.setSize(video.videoWidth, video.videoHeight)
 
-    video.requestVideoFrameCallback(animateScene)
-
-    video.addEventListener('resize', resizeVideo) // when video has variable resolution
-    video.addEventListener('loadedmetadata', resizeVideo) // when video resolution metadata loads
-
-    function resizeVideo () {
-      this.renderer.setSize(video.videoWidth, video.videoWidth)
-
-      planeMesh.material.uniforms.image_size.value.set(video.videoWidth, video.videoWidth)
+      planeMesh.material.uniforms.texture_size.value.set(video.videoWidth, video.videoHeight)
     }
 
-    function animateScene () {
+    const animateScene = () => {
       if (this.destroyed) return
       planeMesh.material.uniforms.random.value = Math.random()
 
@@ -52,6 +46,11 @@ export default class VideoDeband {
 
       video.requestVideoFrameCallback(animateScene)
     }
+
+    video.requestVideoFrameCallback(animateScene)
+
+    video.addEventListener('resize', resizeVideo) // when video has variable resolution
+    video.addEventListener('loadedmetadata', resizeVideo) // when video resolution metadata loads
 
     this.canvas = this.renderer.domElement
   }

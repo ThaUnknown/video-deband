@@ -4,6 +4,7 @@ logs
 pnpm-debug.log*
 lerna-debug.log*
 
+video
 node_modules
 dist
 dist-ssr

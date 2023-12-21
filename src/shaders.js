@@ -1,18 +1,19 @@
 export const vertexShader = /* glsl */`
 varying vec2 pos;
-void main() 
+void main()
 {
   pos = uv;
   gl_Position = vec4(position, 1.0);
-}`
+}
+`
 
 export const fragmentShader = /* glsl */`
 uniform sampler2D u_texture;    
 uniform vec2 texture_size;
-varying vec2 vUv;
+varying vec2 pos;
 uniform float random;
 
-#define THRESHOLD 80
+#define THRESHOLD 88
 #define RANGE 17
 #define ITERATIONS 4
 #define GRAIN 12
@@ -36,6 +37,7 @@ vec4 average(sampler2D tex, vec2 pos, float range, inout float h)
   ref[0] = texture(tex, pos + pt * vec2( o.x,  o.y));
   ref[1] = texture(tex, pos + pt * vec2(-o.y,  o.x));
   ref[2] = texture(tex, pos + pt * vec2(-o.x, -o.y));
+  ref[3] = texture(tex, pos + pt * vec2( o.y, -o.x));
 
   // Return the (normalized) average
   return (ref[0] + ref[1] + ref[2] + ref[3]) * 0.25;
@@ -66,4 +68,5 @@ void main ()
   col.rgb += (float(GRAIN)/8192.0) * (noise - vec3(0.5));
 
   gl_FragColor = col;
-}`
+}
+`
