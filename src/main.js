@@ -31,9 +31,12 @@ export default class VideoDeband {
     scene.add(planeMesh)
 
     this.renderer = new WebGLRenderer()
+    this.canvas = this.renderer.domElement
     this.renderer.setSize(video.videoWidth, video.videoHeight)
+
     const resizeVideo = () => {
       this.renderer.setSize(video.videoWidth, video.videoHeight)
+      this.canvas.style.aspectRatio = `${video.videoWidth} / ${video.videoHeight}`
 
       planeMesh.material.uniforms.texture_size.value.set(video.videoWidth, video.videoHeight)
     }
@@ -51,8 +54,6 @@ export default class VideoDeband {
 
     video.addEventListener('resize', resizeVideo) // when video has variable resolution
     video.addEventListener('loadedmetadata', resizeVideo) // when video resolution metadata loads
-
-    this.canvas = this.renderer.domElement
   }
 
   getStream () {
@@ -62,6 +63,7 @@ export default class VideoDeband {
   getVideo () {
     const video = document.createElement('video')
     video.srcObject = this.getStream()
+    video.play()
     return video
   }
 

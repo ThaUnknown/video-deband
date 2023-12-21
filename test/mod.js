@@ -9,6 +9,9 @@ deband.canvas.style.width = 'unset'
 window.dd = deband
 
 video?.parentElement.append(deband.canvas)
+const a = deband.getVideo()
+a.classList.add('h-400')
+video?.parentElement.append(a)
 const x = {
   RGB: {
     'BT.709': 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'f\'><feColorMatrix type=\'matrix\' values=\'1 0 1.5746 0 0 1 -0.1873 -0.4683 0 0 1 1.8556 0 0 0 0 0 0 1 0\'/></filter></svg>#f")',
