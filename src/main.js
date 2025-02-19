@@ -88,8 +88,7 @@ export default class VideoDeband {
     video.addEventListener('resize', resizeVideo) // when video has variable resolution
     video.addEventListener('loadedmetadata', resizeVideo) // when video resolution metadata loads
 
-    resizeVideo();
-
+    resizeVideo()
     video.requestVideoFrameCallback(animateScene)
   }
 
