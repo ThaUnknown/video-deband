@@ -29,6 +29,6 @@
   "homepage": "https://github.com/ThaUnknown/video-deband#readme",
   "dependencies": {
     "rvfc-polyfill": "^1.0.7",
-    "three": "^0.159.0"
+    "twgl.js": "^5.5.4"
   }
 }
