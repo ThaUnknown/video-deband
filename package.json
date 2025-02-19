@@ -1,6 +1,6 @@
 {
   "name": "video-deband",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Automatically deband a video using a WebGL shader to get rid of those pesky compression artifacts.",
   "files": [
     "dist/*",
@@ -29,6 +29,6 @@
   "homepage": "https://github.com/ThaUnknown/video-deband#readme",
   "dependencies": {
     "rvfc-polyfill": "^1.0.7",
-    "three": "^0.159.0"
+    "twgl.js": "^5.5.4"
   }
 }

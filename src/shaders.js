@@ -1,13 +1,16 @@
 export const vertexShader = /* glsl */`
+attribute vec4 position;
+attribute vec2 uv;
 varying vec2 pos;
 void main()
 {
   pos = uv;
-  gl_Position = vec4(position, 1.0);
+  gl_Position = vec4(position.x, position.y, position.z, 1.0);
 }
 `
 
 export const fragmentShader = /* glsl */`
+precision highp float;
 uniform sampler2D u_texture;    
 uniform vec2 texture_size;
 varying vec2 pos;
@@ -34,10 +37,10 @@ vec4 average(sampler2D tex, vec2 pos, float range, inout float h)
 
   // Sample at quarter-turn intervals around the source pixel
   vec4 ref[4];
-  ref[0] = texture(tex, pos + pt * vec2( o.x,  o.y));
-  ref[1] = texture(tex, pos + pt * vec2(-o.y,  o.x));
-  ref[2] = texture(tex, pos + pt * vec2(-o.x, -o.y));
-  ref[3] = texture(tex, pos + pt * vec2( o.y, -o.x));
+  ref[0] = texture2D(tex, pos + pt * vec2( o.x,  o.y));
+  ref[1] = texture2D(tex, pos + pt * vec2(-o.y,  o.x));
+  ref[2] = texture2D(tex, pos + pt * vec2(-o.x, -o.y));
+  ref[3] = texture2D(tex, pos + pt * vec2( o.y, -o.x));
 
   // Return the (normalized) average
   return (ref[0] + ref[1] + ref[2] + ref[3]) * 0.25;
@@ -51,13 +54,13 @@ void main ()
   h = permute(permute(permute(m.x)+m.y)+m.z);
 
   // Sample the source pixel
-  vec4 col = texture(u_texture, pos);
+  vec4 col = texture2D(u_texture, pos);
 
   for (int i = 1; i <= ITERATIONS; i++) {
     // Use the average instead if the difference is below the threshold
     vec4 avg = average(u_texture, pos, float(i * RANGE), h);
     vec4 diff = abs(col - avg);
-    col = mix(avg, col, greaterThan(diff, vec4(float(THRESHOLD) / (float(i) * 16384.0))));
+    col = mix(avg, col, step(vec4(float(THRESHOLD) / (float(i) * 16384.0)), diff));
   }
 
   // Add some random noise to the output
