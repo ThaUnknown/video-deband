@@ -3,34 +3,27 @@ import 'rvfc-polyfill'
 import { fragmentShader, vertexShader } from './shaders.js'
 
 export default class VideoDeband {
-  /** @type {HTMLCanvasElement} */
-  canvas
-  /** @type {WebGLTexture} */
-  texture
-  /** @type {WebGL2RenderingContext} */
-  gl
+  canvas = document.createElement('canvas')
+  gl = /** @type {WebGL2RenderingContext} */(this.canvas.getContext('webgl2'))
+  texture = this.gl.createTexture()
   destroyed = false
-  /**
-   * @param {HTMLVideoElement} video
-   */
+
+  /** @param {HTMLVideoElement} video */
   constructor (video) {
     if (!video) throw new Error('Video element required')
-
-    this.canvas = document.createElement('canvas')
-    this.gl = this.canvas.getContext('webgl2')
     if (!this.gl) throw new Error('WebGL2 not supported')
 
-    const programInfo = createProgramInfo(this.gl, [ vertexShader, fragmentShader ])
+    const programInfo = createProgramInfo(this.gl, [vertexShader, fragmentShader])
     this.gl.useProgram(programInfo.program)
 
-    const arrays = {
-      position: { 
-        numComponents: 3, 
+    const bufferInfo = createBufferInfoFromArrays(this.gl, {
+      position: {
+        numComponents: 3,
         data: [
           -1, -1, 0,
-           1, -1, 0,
+          1, -1, 0,
           -1, 1, 0,
-           1, 1, 0
+          1, 1, 0
         ]
       },
       uv: {
@@ -49,11 +42,9 @@ export default class VideoDeband {
           2, 1, 3
         ]
       }
-    }
+    })
+    setBuffersAndAttributes(this.gl, programInfo, bufferInfo)
 
-    const bufferInfo = createBufferInfoFromArrays(this.gl, arrays)
-
-    this.texture = this.gl.createTexture()
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture)
 
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE)
@@ -70,14 +61,13 @@ export default class VideoDeband {
       this.gl.viewport(0, 0, this.canvas.width, this.canvas.height)
       this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.canvas.width, this.canvas.height, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, null)
 
-      setUniforms(programInfo, { texture_size: [ this.canvas.width, this.canvas.height ] })
+      setUniforms(programInfo, { texture_size: [this.canvas.width, this.canvas.height] })
     }
 
     const animateScene = () => {
       if (this.destroyed) return
       this.gl.texSubImage2D(this.gl.TEXTURE_2D, 0, 0, 0, this.canvas.width, this.canvas.height, this.gl.RGBA, this.gl.UNSIGNED_BYTE, video)
 
-      setBuffersAndAttributes(this.gl, programInfo, bufferInfo)
       setUniforms(programInfo, { random: Math.random() })
 
       drawBufferInfo(this.gl, bufferInfo, this.gl.TRIANGLE_STRIP)
@@ -85,10 +75,9 @@ export default class VideoDeband {
       video.requestVideoFrameCallback(animateScene)
     }
 
-    video.addEventListener('resize', resizeVideo) // when video has variable resolution
-    video.addEventListener('loadedmetadata', resizeVideo) // when video resolution metadata loads
+    video.addEventListener('resize', resizeVideo)
 
-    resizeVideo()
+    if (video.readyState) resizeVideo()
     video.requestVideoFrameCallback(animateScene)
   }
 
@@ -114,9 +103,7 @@ export default class VideoDeband {
 
   destroy () {
     this.destroyed = true
-    if (this.gl && this.texture) this.gl.deleteTexture(this.texture)
-    if (this.gl) this.gl.getExtension('WEBGL_lose_context').loseContext()
-    this.gl = null
-    this.texture = null
+    this.gl.deleteTexture(this.texture)
+    this.gl.getExtension('WEBGL_lose_context')?.loseContext()
   }
 }

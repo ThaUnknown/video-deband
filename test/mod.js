@@ -4,6 +4,7 @@ const video = document.querySelector('video')
 
 const deband = new VideoDeband(video)
 
+// video.src = '../video/fucked.mkv#t=49'
 deband.canvas.classList.add('h-400')
 deband.canvas.style.width = 'unset'
 window.dd = deband
