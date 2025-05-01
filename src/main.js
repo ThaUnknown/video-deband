@@ -6,7 +6,8 @@ export default class VideoDeband {
   canvas = document.createElement('canvas')
   gl = /** @type {WebGL2RenderingContext} */(this.canvas.getContext('webgl2'))
   texture = this.gl.createTexture()
-  destroyed = false
+
+  ctrl = new AbortController()
 
   /** @param {HTMLVideoElement} video */
   constructor (video) {
@@ -65,7 +66,7 @@ export default class VideoDeband {
     }
 
     const animateScene = () => {
-      if (this.destroyed) return
+      if (this.ctrl.signal.aborted) return
       this.gl.texSubImage2D(this.gl.TEXTURE_2D, 0, 0, 0, this.canvas.width, this.canvas.height, this.gl.RGBA, this.gl.UNSIGNED_BYTE, video)
 
       setUniforms(programInfo, { random: Math.random() })
@@ -75,7 +76,7 @@ export default class VideoDeband {
       video.requestVideoFrameCallback(animateScene)
     }
 
-    video.addEventListener('resize', resizeVideo)
+    video.addEventListener('resize', resizeVideo, {signal: this.ctrl.signal})
 
     if (video.readyState) resizeVideo()
     video.requestVideoFrameCallback(animateScene)
@@ -85,11 +86,11 @@ export default class VideoDeband {
     return this.canvas.captureStream()
   }
 
-  getVideo () {
+  async getVideo () {
     const video = document.createElement('video')
     video.muted = true
     video.srcObject = this.getStream()
-    video.play()
+    await video.play()
     return video
   }
 
@@ -102,7 +103,7 @@ export default class VideoDeband {
   }
 
   destroy () {
-    this.destroyed = true
+    this.ctrl.abort()
     this.gl.deleteTexture(this.texture)
     this.gl.getExtension('WEBGL_lose_context')?.loseContext()
   }
