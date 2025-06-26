@@ -5,6 +5,7 @@
 Automatically deband a video using a WebGL shader to get rid of those pesky compression artifacts.
 
 ## Functions:
+
 ```js
 import VideoDeband from 'video-deband'
 
@@ -30,4 +31,10 @@ deband.dispose()
 // or in typescript to clean up automatically
 using deband = new VideoDeband(document.querySelector('video'))
 
+```
+
+In some very rare and specific configurations, the default WebGL context options could be problematic, change them like so:
+
+```js
+const deband = new VideoDeband(document.querySelector('video'), { alpha: true })
 ```

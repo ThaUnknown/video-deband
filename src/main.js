@@ -4,15 +4,20 @@ import { fragmentShader, vertexShader } from './shaders.js'
 
 export default class VideoDeband {
   canvas = document.createElement('canvas')
-  gl = /** @type {WebGL2RenderingContext} */(this.canvas.getContext('webgl2'))
-  texture = this.gl.createTexture()
+  gl
+  texture
 
   ctrl = new AbortController()
 
-  /** @param {HTMLVideoElement} video */
-  constructor (video) {
+  /** 
+   * @param {HTMLVideoElement} video 
+   * @param {WebGLContextAttributes} [options]
+   **/
+  constructor (video, options = { alpha: false, powerPreference: 'high-performance', desynchronized: true }) {
     if (!video) throw new Error('Video element required')
+    this.gl = /** @type {WebGL2RenderingContext} */(this.canvas.getContext('webgl2', options))
     if (!this.gl) throw new Error('WebGL2 not supported')
+    this.texture = this.gl.createTexture()
 
     const programInfo = createProgramInfo(this.gl, [vertexShader, fragmentShader])
     this.gl.useProgram(programInfo.program)
@@ -104,6 +109,7 @@ export default class VideoDeband {
 
   destroy () {
     this.ctrl.abort()
+    this.canvas.remove()
     this.gl.deleteTexture(this.texture)
     this.gl.getExtension('WEBGL_lose_context')?.loseContext()
   }

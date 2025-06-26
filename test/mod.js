@@ -2,7 +2,7 @@ import VideoDeband from '../src/main.js'
 
 const video = document.querySelector('video')
 
-const deband = new VideoDeband(video)
+const deband = globalThis.deband = new VideoDeband(video)
 
 // video.src = '../video/fucked.mkv#t=49'
 deband.canvas.classList.add('h-400')
@@ -10,9 +10,9 @@ deband.canvas.style.width = 'unset'
 window.dd = deband
 
 video?.parentElement.append(deband.canvas)
-const a = deband.getVideo()
+const a = globalThis.vid= await deband.getVideo()
 a.classList.add('h-400')
-video?.parentElement.append(a)
+// video?.parentElement.append(a)
 const x = {
   RGB: {
     'BT.709': 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'f\'><feColorMatrix type=\'matrix\' values=\'1 0 1.5746 0 0 1 -0.1873 -0.4683 0 0 1 1.8556 0 0 0 0 0 0 1 0\'/></filter></svg>#f")',
@@ -42,8 +42,8 @@ const x = {
 
 const context = canvas.getContext('2d')
 window.cc = context
-const selected = x.RGB['BT.709']
-context.filter = selected
+const selected = x.RGB['BT.2020']
+// context.filter = selected
 function loop () {
   context.filter = selected
   context.drawImage(video, 0, 0)
