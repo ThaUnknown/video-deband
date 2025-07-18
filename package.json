@@ -1,6 +1,6 @@
 {
   "name": "video-deband",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Automatically deband a video using a WebGL shader to get rid of those pesky compression artifacts.",
   "files": [
     "dist/*",

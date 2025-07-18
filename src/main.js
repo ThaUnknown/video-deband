@@ -7,10 +7,10 @@ export default class VideoDeband {
   gl
   texture
 
-  ctrl = new AbortController()
+  destroyed = false
 
-  /** 
-   * @param {HTMLVideoElement} video 
+  /**
+   * @param {HTMLVideoElement} video
    * @param {WebGLContextAttributes} [options]
    **/
   constructor (video, options = { alpha: false, powerPreference: 'high-performance', desynchronized: true }) {
@@ -58,21 +58,26 @@ export default class VideoDeband {
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR)
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR)
 
-    const resizeVideo = () => {
-      this.canvas.width = video.videoWidth
-      this.canvas.height = video.videoHeight
+    const resizeVideo = (/** @type {number} */ width, /** @type {number} */ height) => {
+      this.canvas.width = width
+      this.canvas.height = height
 
-      this.canvas.style.aspectRatio = `${this.canvas.width} / ${this.canvas.height}`
+      this.canvas.style.aspectRatio = `${width} / ${height}`
 
-      this.gl.viewport(0, 0, this.canvas.width, this.canvas.height)
-      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.canvas.width, this.canvas.height, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, null)
+      this.gl.viewport(0, 0, width, height)
+      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, width, height, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, null)
 
-      setUniforms(programInfo, { texture_size: [this.canvas.width, this.canvas.height] })
+      setUniforms(programInfo, { texture_size: [width, height] })
     }
 
-    const animateScene = () => {
-      if (this.ctrl.signal.aborted) return
-      this.gl.texSubImage2D(this.gl.TEXTURE_2D, 0, 0, 0, this.canvas.width, this.canvas.height, this.gl.RGBA, this.gl.UNSIGNED_BYTE, video)
+    /**
+     * @param {number} _
+     * @param {{height: number, width: number}} metadata
+     */
+    const animateScene = (_, { height, width }) => {
+      if (this.destroyed) return
+      if (height !== this.canvas.height || width !== this.canvas.width) resizeVideo(width, height)
+      this.gl.texSubImage2D(this.gl.TEXTURE_2D, 0, 0, 0, width, height, this.gl.RGBA, this.gl.UNSIGNED_BYTE, video)
 
       setUniforms(programInfo, { random: Math.random() })
 
@@ -81,9 +86,6 @@ export default class VideoDeband {
       video.requestVideoFrameCallback(animateScene)
     }
 
-    video.addEventListener('resize', resizeVideo, {signal: this.ctrl.signal})
-
-    if (video.readyState) resizeVideo()
     video.requestVideoFrameCallback(animateScene)
   }
 
@@ -108,7 +110,7 @@ export default class VideoDeband {
   }
 
   destroy () {
-    this.ctrl.abort()
+    this.destroyed = true
     this.canvas.remove()
     this.gl.deleteTexture(this.texture)
     this.gl.getExtension('WEBGL_lose_context')?.loseContext()
